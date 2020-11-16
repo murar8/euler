@@ -35,14 +35,18 @@ impl Iterator for Sieve {
     fn next(&mut self) -> Option<Self::Item> {
         let candidate = self.wheel.next().unwrap();
 
-        while self.multiples.peek().map_or(false, |m| m.value < candidate) {
-            let Multiple { base, value: _ } = self.multiples.pop().unwrap();
+        while let Some(&Multiple { base, value }) = self.multiples.peek() {
+            if value == candidate {
+                return self.next();
+            }
+
+            if value > candidate {
+                break;
+            }
+
+            self.multiples.pop();
             let value = base * (1 + ((candidate - 1) / base));
             self.multiples.push(Multiple { base, value });
-        }
-
-        if self.multiples.peek().map_or(false, |m| m.value == candidate) {
-            return self.next();
         }
 
         if candidate > *self.wheel.basis.last().unwrap() {
