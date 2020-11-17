@@ -5,7 +5,6 @@ format_macro_matchers = true
 format_strings = true
 inline_attribute_width = 50
 match_arm_leading_pipes = "always"
-# max_width = 100
 merge_imports = true
 reorder_impl_items = true
 report_fixme = "Always"

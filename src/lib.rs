@@ -3,6 +3,5 @@
 
 extern crate test;
 
-pub mod eratosthenes;
 pub mod sieve;
 pub mod wheel;

@@ -1,12 +1,24 @@
-use euler::{eratosthenes::primes_to, sieve::Sieve};
+use euler::sieve::Sieve;
 
 fn main() {
-    let sieve = Sieve::new();
-    let time = std::time::Instant::now();
-    let _ = sieve.take_while(|n| *n < 100_000).for_each(|_| {});
-    println!("time for iterator: {}", std::time::Instant::now().duration_since(time).as_micros());
+    let mut sieve = Sieve::new();
 
-    let time = std::time::Instant::now();
-    let _ = primes_to(100_000_000);
-    println!("time for sieve: {}", std::time::Instant::now().duration_since(time).as_micros());
+    let mut max = (0, 0, 0, 0);
+
+    for a in -999i64..=999 {
+        for b in -1000i64..=1000 {
+            for n in 0.. {
+                let quadratic = (n * n) + (a * n) + b;
+                if quadratic >= 0 && sieve.is_prime(quadratic as u64) {
+                    if n > max.1 {
+                        max = (quadratic, n, a, b);
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+
+    println!("{:?}", max.2 * max.3);
 }

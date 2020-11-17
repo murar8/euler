@@ -5,3 +5,4 @@ authors = ["Lorenzo Murarotto <lnzmrr@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+priority-queue = "1.0.2"
