@@ -1,40 +1,42 @@
-use std::collections::BinaryHeap;
+#![feature(bindings_after_at)]
+
+use std::collections::{BinaryHeap, HashMap};
 
 #[derive(Debug, Eq, PartialEq)]
-struct Triple(u64, u64, u64);
+struct Triple {
+    k: u64,
+    m: u64,
+    n: u64,
+}
 
-impl PartialOrd for Triple {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some((self.0 + self.1 + self.2).cmp(&(other.0 + other.1 + other.2)))
-    }
+impl Triple {
+    fn a(&self) -> u64 { self.k * (self.m * self.m - self.n * self.n) }
+
+    fn b(&self) -> u64 { self.k * (2 * self.m * self.n) }
+
+    fn c(&self) -> u64 { self.k * (self.m * self.m + self.n * self.n) }
+
+    fn perimeter(&self) -> u64 { self.a() + self.b() + self.c() }
 }
 
 impl Ord for Triple {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering { self.partial_cmp(other).unwrap() }
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering { other.perimeter().cmp(&self.perimeter()) }
 }
 
-#[derive(Debug, Eq, PartialEq)]
-struct CoprimePair(u64, u64);
-
-impl PartialOrd for CoprimePair {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        let triple = |m, n| (m * m - n * n) + (2 * m * n) + (m * m + n * n);
-        Some(triple(other.0, other.1).cmp(&triple(self.0, self.1)))
-    }
-}
-
-impl Ord for CoprimePair {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering { self.partial_cmp(other).unwrap() }
+impl PartialOrd for Triple {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> { Some(self.cmp(&other)) }
 }
 
 #[derive(Debug)]
 struct TripleGenerator {
-    coprimes: BinaryHeap<CoprimePair>,
+    max_perimeter: u64,
+    triples: BinaryHeap<Triple>,
 }
 
 impl TripleGenerator {
-    fn new() -> Self {
-        TripleGenerator { coprimes: BinaryHeap::from(vec![CoprimePair(2, 1), CoprimePair(3, 1)]) }
+    fn new(max_perimeter: u64) -> Self {
+        let roots = vec![Triple { k: 1, m: 2, n: 1 }];
+        TripleGenerator { max_perimeter, triples: BinaryHeap::from(roots) }
     }
 }
 
@@ -42,28 +44,37 @@ impl Iterator for TripleGenerator {
     type Item = Triple;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let CoprimePair(m, n) = self.coprimes.pop().unwrap();
+        let triple @ Triple { k, m, n } = self.triples.pop()?;
 
-        self.coprimes.push(CoprimePair(2 * m - n, m));
-        self.coprimes.push(CoprimePair(2 * m + n, m));
-        self.coprimes.push(CoprimePair(2 * n + m, n));
+        let mut candidates = vec![Triple { k: k + 1, m, n }];
 
-        // println!("{:?}", Triple(m * m - n * n, 2 * m * n, m * m + n * n));
-        Some(Triple(m * m - n * n, 2 * m * n, m * m + n * n))
+        if k == 1 {
+            candidates.push(Triple { k: 1, m: 2 * m - n, n: m });
+            candidates.push(Triple { k: 1, m: 2 * m + n, n: m });
+            candidates.push(Triple { k: 1, m: 2 * n + m, n });
+        }
+
+        let candidates = candidates
+            .into_iter()
+            .filter(|t| t.perimeter() < self.max_perimeter)
+            .collect::<Vec<_>>();
+
+        self.triples.extend(candidates);
+
+        Some(triple)
     }
 }
 
 fn main() {
-    println!("{:?}", 0);
-}
+    let tg = TripleGenerator::new(1_500_000 + 1);
+    let mut perimeters = HashMap::new();
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_triple_generator() {
-        let tg = TripleGenerator::new();
-        assert_eq!(tg.take(1000).map(|k| k.0 + k.1 + k.2).collect::<Vec<_>>(), []);
+    for triple in tg {
+        let value = perimeters.entry(triple.perimeter()).or_insert(0u64);
+        *value += 1;
     }
+
+    let solution = perimeters.into_iter().filter(|(_, v)| *v == 1).count();
+
+    println!("{:?}", solution);
 }
