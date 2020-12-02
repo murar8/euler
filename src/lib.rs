@@ -5,5 +5,6 @@ extern crate test;
 
 pub mod digits;
 pub mod duplicates;
+pub mod permutations;
 pub mod sieve;
 pub mod wheel;
