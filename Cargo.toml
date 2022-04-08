@@ -2,8 +2,9 @@
 name = "euler"
 version = "0.1.0"
 authors = ["Lorenzo Murarotto <lnzmrr@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 priority-queue = "1.0.2"
-num-bigint = "0.3"
+num-bigint = "0.4.3"
+either = "1.6.1"

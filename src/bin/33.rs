@@ -1,7 +1,4 @@
-use std::{
-    cmp::{max, min},
-    collections::HashSet,
-};
+use std::cmp::max;
 
 type Fraction = (usize, usize);
 
@@ -42,7 +39,7 @@ fn simplify((mut n, mut d): Fraction) -> Fraction {
         let mut done = true;
 
         for p in 2..=max {
-            if n % p == 0 && n % p == 0 {
+            if n % p == 0 {
                 n /= p;
                 d /= p;
                 done = false;

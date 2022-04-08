@@ -1,5 +1,3 @@
-#![feature(bindings_after_at)]
-
 use std::collections::{BinaryHeap, HashMap};
 
 #[derive(Debug, Eq, PartialEq)]
